@@ -2,29 +2,35 @@ import React, {Component, useEffect, useState} from 'react';
 import './itemList.css';
 import Spinner from '../spinner';
 
-function ItemList ({getData, onItemSelected, renderItem}) {
+export default class ItemList extends Component {
 
-    const [itemList, updateList] = useState([])
-   
-    useEffect(()=>{
+    state = {
+        itemList: null
+    }
+
+    componentDidMount() {
+        const {getData} = this.props;
+
         getData()
-        .then( (data) => {
-            updateList(data)
-        })
-    }, [])
+            .then( (itemList) => {
+                this.setState({
+                    itemList
+                })
+            })
+    }
     
 
-    function renderItems(arr) {
+    renderItems(arr) {
         return arr.map((item) => {
             const {id} = item;
-            const label = renderItem(item);
+            const label = this.props.renderItem(item);
 
             return (
                 <li 
                     key={id}
                     className="list-group-item"
-                    onClick={ () =>  onItemSelected(id)
-                    }>
+                    onClick={ () => this.props.onItemSelected(id)}>
+                    
                     {label}
                 </li>
             )
@@ -32,21 +38,22 @@ function ItemList ({getData, onItemSelected, renderItem}) {
     }
 
    
-   
+    render() {
+        const {itemList} = this.state;
 
-    if (!itemList) {
-        return <Spinner/>
+        if (!itemList) {
+            return <Spinner/>
+        }
+
+        const items = this.renderItems(itemList);
+
+
+        return (
+            <ul className="item-list list-group">
+                {items}
+            </ul>
+        );
     }
-
-    const items = renderItems(itemList);
-
-
-    return (
-        <ul className="item-list list-group">
-            {items}
-        </ul>
-    );
   
 }
 
-export default ItemList
